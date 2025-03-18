@@ -15,15 +15,12 @@ import java.util.function.Consumer;
 
 public class MediaServerWebSocketClient extends WebSocketClient {
     public final BlockingQueue<String> queue = new LinkedBlockingQueue<>(10);
-    private final ObjectMapper mapper = new ObjectMapper();
+    private Map<String, Consumer<Object>> callbacks = new HashMap<>();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public MediaServerWebSocketClient(String serverUri) {
         super(URI.create(serverUri));
     }
-
-    private Map<String, Consumer<Object>> callbacks = new HashMap<>();
-
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void onOpen(ServerHandshake handshake) {
@@ -58,6 +55,7 @@ public class MediaServerWebSocketClient extends WebSocketClient {
             }
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
+            throw new RuntimeException(e.getCause());
         }
     }
 
@@ -69,16 +67,17 @@ public class MediaServerWebSocketClient extends WebSocketClient {
     @Override
     public void onError(Exception ex) {
         ex.printStackTrace();
+        throw new RuntimeException(ex.getCause());
     }
 
     public Object executeCommand(String command, Class<?> clazz) {
         try {
             this.send(command);
             String response = queue.take();
-            return mapper.readValue(response, clazz);
+            return objectMapper.readValue(response, clazz);
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            throw new RuntimeException(e.getCause());
         }
     }
 
@@ -87,10 +86,10 @@ public class MediaServerWebSocketClient extends WebSocketClient {
             String json = command.getJSON();
             this.send(json);
             String response = queue.take();
-            return mapper.readValue(response, clazz);
+            return objectMapper.readValue(response, clazz);
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return new RuntimeException(e.getCause());
         }
     }
 }

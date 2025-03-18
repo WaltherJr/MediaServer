@@ -1,6 +1,8 @@
 package org.eriksandsten;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,7 +35,7 @@ public class MediaHelper {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(radxaRockServerUrl + "/tv/channel"))
                     .timeout(Duration.of(2, ChronoUnit.SECONDS))
-                    .header("Content-Type", "application/x-www-form-urlencoded") // Set content type
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                     .PUT(HttpRequest.BodyPublishers.ofString("channel=" + channel, StandardCharsets.UTF_8))
                     .build();
 
@@ -44,7 +46,7 @@ public class MediaHelper {
     public static void turnOffTV() {
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(radxaRockServerUrl + "/tv-ff"))
+                    .uri(new URI(radxaRockServerUrl + "/tv-off"))
                     .timeout(Duration.of(2, ChronoUnit.SECONDS))
                     .GET()
                     .build();

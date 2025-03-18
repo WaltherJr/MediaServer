@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class EnableResponse {
-    public Long id;
-    public Result result;
-    public String sessionId;
+    private Long id;
+    private Result result;
+    private String sessionId;
 
     @Data
     public static class Result {

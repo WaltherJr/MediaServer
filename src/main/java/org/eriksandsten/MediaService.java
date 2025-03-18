@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-import java.io.IOException;
 import java.net.ConnectException;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -15,7 +14,6 @@ import java.util.regex.Pattern;
 @Service
 public class MediaService {
     private final Logger logger = LoggerFactory.getLogger(MediaService.class);
-
     private final Pattern allenteTVChannelURLRegex = Pattern.compile("https://tv\\.allente\\.se/play/live/([0-9]+)");
     private final Integer thisServiceHDMIChannel;
     private final String allenteTVChannelURL;
@@ -36,16 +34,14 @@ public class MediaService {
     public MediaService(@Value("${thisServiceHDMIChannel}") Integer thisServiceHDMIChannel,
                         @Value("${allente_tv_channel_url}") String allenteTVChannelURL,
                         @Value("${allente_tv_channel_epg_url}") String allenteTVChannelEpgURL,
-                        @Value("${allente_username}") String allenteUsername,
-                        @Value("${allente_password}") String allentePassword,
                         MessageSource messageSource,
-                        ChromeDevTools chromeDevTools) throws IOException {
+                        ChromeDevTools chromeDevTools) {
 
         this.thisServiceHDMIChannel = thisServiceHDMIChannel;
         this.allenteTVChannelURL = allenteTVChannelURL;
         this.allenteTVChannelEpgURL = allenteTVChannelEpgURL;
-        this.allenteUsername = allenteUsername;
-        this.allentePassword = allentePassword;
+        this.allenteUsername = System.getenv("AllenteUsername");
+        this.allentePassword = System.getenv("AllentePassword");
         this.youtubeVideoPlayer = new YoutubeVideoPlayer();
         this.allenteVideoPlayer = new AllenteVideoPlayer();
         this.messageSource = messageSource;

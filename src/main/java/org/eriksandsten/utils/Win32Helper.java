@@ -18,7 +18,7 @@ public class Win32Helper {
     public Long getWindowHandleByProcessId_nonNative(long processId) {
         long windowHandle = getWindowHandleByProcessId(Long.valueOf(processId).intValue());
         String windowTitle = getWindowTitleByWindowHandle(windowHandle);
-        List<String> apas = getWindowCaptionsByProcessId(Long.valueOf(processId).intValue());
+        List<String> windowCaptions = getWindowCaptionsByProcessId(Long.valueOf(processId).intValue());
 
         // setActiveWindow(windowHandle);
 
