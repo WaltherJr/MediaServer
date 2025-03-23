@@ -1,4 +1,4 @@
-    from flask import Flask, jsonify, request, make_response, render_template
+from flask import Flask, jsonify, request, make_response, render_template
 from subprocess import PIPE, run, Popen
 import re
 import time
@@ -69,6 +69,19 @@ def create_error_json_response(statusCode, response):
 def create_success_json_response(statusCode, response, responseHeaders = {}):
     return create_response(statusCode, {"responseType": "SUCCESS","response": response}, responseHeaders)
 
+def validate_to_channel_parameter(request):
+    return validate_parameter(request.args.get("to"), "to", "^[0-9]$", "--to {parameter}", False)
+
+def validate_parameter(parameterValue, parameterName, validParameterRegex, returnValueStringTemplate, mandatory = False):
+    if (parameterValue):
+        parameterValueStr = str(parameterValue)
+        if (not re.match(validParameterRegex, parameterValueStr)):
+            raise ValidationError(INVALID_REQUEST_PARAMETER_VALUE.format(parameterValue = parameterValueStr, parameterName = parameterName))
+        else:
+            return returnValueStringTemplate.format(parameter = parameterValueStr)
+    elif (mandatory):
+        raise ValidationError(MANDATORY_REQUEST_PARAMETER_IS_MISSING.format(parameterName = parameterName))
+
 @app.route("/", methods = ["GET"])
 def hello():
     return "Hello from Radxa Rock server!"
@@ -99,7 +112,6 @@ def get_hdmi_cec_topology():
         command = "cec-ctl" + (f" {toChannelString}" if toChannelString else "") + " -d/dev/cec0 --show-topology"
         result = run(command, stdout = PIPE, stderr = PIPE, universal_newlines = True, shell=True)
         return create_success_json_response(200, {"command": command, "stdout": result.stdout, "stderr": result.stderr}, {"Access-Control-Allow-Origin": "*"})
-
     except ValidationError as e:
         return create_error_json_response(400, str(e))
     except Exception as e:
@@ -109,11 +121,9 @@ def get_hdmi_cec_topology():
 def get_current_hdmi_channel():
     try:
         toChannelString = validate_to_channel_parameter(request)
-        result = run("cec-ctl" + (f" {toChannelString}" if toChannelString else "") +  " --give-physical-addr", capture_output=True, text=True, universal_newlines = True, shell=True)
-        extractedChannel = run("awk -F ': ' '/Physical Address/ {print $2}'", input=result.stdout, capture_output=True, text=True, universal_newlines = True, shell=True)
-        final = run("cut -d '.' -f 1", input=extractedChannel.stdout, capture_output=True, text=True, universal_newlines = True, shell=True)
-        return create_success_json_response(200, {"channel": int(final.stdout.strip())}, {"Access-Control-Allow-Origin": "*"})
-
+        command = "cec-ctl" + (f" {toChannelString}" if toChannelString else "") + " --give-physical-addr | awk '/Physical Address[[:space:]]+: ([0-9])/ {print substr($4, 0, 1)}'"
+        result = run(command, capture_output=True, text=True, universal_newlines = True, shell=True)
+        return create_success_json_response(200, {"channel": int(result.stdout.strip())}, {"Access-Control-Allow-Origin": "*"})
     except ValidationError as e:
         return create_error_json_response(400, str(e))
     except Exception as e:
@@ -134,52 +144,32 @@ def switch_hdmi_channel():
         return create_error_json_response(500, str(e))
 
 
-@app.route("/hdmi/current-channel/volume", methods = ["GET"])
-def get_current_hdmi_channel():
-    try:
-
-    except ValidationError as e:
-        return create_error_json_response(400, str(e))
-    except Exception as e:
-        return create_error_json_response(500, str(e))
-
-
-def create_cec_volume_up_command():
-    return "-user-control-pressed ui-cmd=volume-up"
-def create_cec_volume_down_command():
-    return "--user-control-prssed ui-cmd=volume-down"
-
-@app.route("/hdmi/current-channel/volume", methods = ["PUT"])
-def get_current_hdmi_channel_volume():
-    try:
-        toChannelString = validate_to_channel_parameter(request)
-        command = "cec-ctl" + (f" {toChannelString}" if toChannelString else "") + " -d/dev/cec0 " + create_cec_volume_down_command()
-    except ValidationError as e:
-        return create_error_json_response(400, str(e))
-    except Exception as e:
-        return create_error_json_response(500, str(e))
-
-
 @app.route("/tv/standbystate", methods = ["GET"])
+def get_tv_standby_state():
+    requestBody = request.json
+    standByStateString = validate_parameter(requestBody.get("standbyState"), "standbyState", "^(on|off)$", "{parameter}", True)
+    toChannelString = validate_to_channel_parameter(request)
+    command = "cec-ctl" + (f" {toChannelString}" if toChannelString else "") + " -d/dev/cec0"
+    if standByStateString == "off":
+        command += " --standby"
+    elif standByStateString == "on":
+        command += " --image-view-on"
+    result = issue_hdmi_cec_command(command)
+    return create_success_json_response(200, result, {"Access-Control-Allow-Origin": "*"})
+
+'''
+@app.route("/tv/standbystate", methods = ["PUT"])
 def set_tv_standby_state():
     try:
-        requestBody = request.json
-        standByStateString = validate_parameter(requestBody.get("standbyState"), "standbyState", "^(on|off)$", "{parameter}", True)
         toChannelString = validate_to_channel_parameter(request)
-        command = "cec-ctl" + (f" {toChannelString}" if toChannelString else "") + " -d/dev/cec0"
-        if standByStateString == "off":
-            command += " --standby"
-        elif standByStateString == "on":
-            command += " --image-view-on"
-
-        result = issue_hdmi_cec_command(command)
-        return create_success_json_response(200, result, {"Access-Control-Allow-Origin": "*"})
-
+        command = "cec-ctl" + (f" {toChannelString}" if toChannelString else "") + " --give-device-power-status | awk '/pwr-state: ([a-z]+) / {print $2}'"
+        result = run(command, capture_output=True, text=True, universal_newlines = True, shell=True)
+        return create_success_json_response(200, {"state": result.stdout.strip()}, {"Access-Control-Allow-Origin": "*"})
     except ValidationError as e:
         return create_error_json_response(400, str(e))
     except Exception as e:
         return create_error_json_response(500, str(e))
-
+'''
 
 @app.route("/tv/standbystate", methods = ["PUT"])
 def set_tv_standby_state():
