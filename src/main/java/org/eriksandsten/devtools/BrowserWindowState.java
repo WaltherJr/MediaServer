@@ -1,10 +1,14 @@
 package org.eriksandsten.devtools;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 @Getter
 public enum BrowserWindowState {
-    NORMAL("normal"), MINIMIZED("minimized"), MAXIMIZED("maximized"), FULLSCREEN("fullscreen");
+    @JsonProperty(value = "normal") NORMAL("normal"),
+    @JsonProperty(value = "minimized") MINIMIZED("minimized"),
+    @JsonProperty(value = "maximized") MAXIMIZED("maximized"),
+    @JsonProperty(value = "fullscreen") FULLSCREEN("fullscreen");
 
     private final String value;
 

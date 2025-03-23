@@ -1,4 +1,4 @@
-# Konfiguration som fukar för Aeotec Zi-Stick!
+# Konfiguration som funkar för Aeotec Zi-Stick!
 version: 4
 mqtt:
   base_topic: zigbee2mqtt

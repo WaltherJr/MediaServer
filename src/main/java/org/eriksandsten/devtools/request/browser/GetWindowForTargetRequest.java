@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eriksandsten.devtools.request.BaseRequest;
 import java.util.Map;
 
+// TODO: fix "Received: {"id":1,"error":{"code":-32000,"message":"Browser window not found"}}" (ChromeConnection needs to be created every request)
 public class GetWindowForTargetRequest extends BaseRequest {
     private final String targetId;
     private final Boolean flatten;

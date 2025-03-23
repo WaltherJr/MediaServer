@@ -1,7 +1,7 @@
 package org.eriksandsten.devtools.request.browser;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.eriksandsten.devtools.WindowBounds;
+import org.eriksandsten.devtools.request.WindowBounds;
 import org.eriksandsten.devtools.request.BaseRequest;
 import java.util.Map;
 
@@ -23,7 +23,7 @@ public class SetWindowBoundsRequest extends BaseRequest {
             "method", "Browser.setWindowBounds",
             "params", Map.of(
                     "windowId", windowId,
-                    "bounds", bounds,
+                    "bounds", bounds.getJSON(),
                     "flatten", flatten
             )
         ));
