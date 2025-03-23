@@ -1,0 +1,35 @@
+COMMAND: cec-ctl -d/dev/cec0 --to 0 --standby, OUTPUT:
+
+Driver Info:
+	Driver Name                : dwhdmi-rockchip
+	Adapter Name               : dw_hdmi
+	Capabilities               : 0x0000011e
+		Logical Addresses
+		Transmit
+		Passthrough
+		Remote Control Support
+		Connector Info
+	Driver version             : 5.10.110
+	Available Logical Addresses: 4
+	DRM Connector Info         : card 0, connector 137
+	Physical Address           : 1.0.0.0
+	Logical Address Mask       : 0x0000
+	CEC Version                : 2.0
+	Vendor ID                  : 0x000c03 (HDMI)
+	OSD Name                   : 'TV'
+	Logical Addresses          : 1 (Allow RC Passthrough)
+
+	  Logical Address          : Not Allocated
+	    Primary Device Type    : TV
+	    Logical Address Type   : TV
+	    All Device Types       : TV
+	    RC TV Profile          : None
+	    Device Features        :
+		None
+
+
+Transmit from Unregistered to TV (15 to 0):
+STANDBY (0x36)
+
+
+ERROR: 
