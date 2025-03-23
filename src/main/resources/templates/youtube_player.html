@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${T(org.eriksandsten.utils.ThymeleafHelper).getLocale()}">
 <head>
     <meta charset="utf-8">
+    <link rel="shortcut icon" href="#">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Embedded YouTube Video</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <title th:text="${documentTitle}"></title>
     <style>
         html, body {
             margin: 0; padding: 0;
         }
+
         iframe {
-            border: none;
+            box-sizing: border-box;
             position: fixed;
             left: 0;
             top: 0;
@@ -19,16 +22,44 @@
     </style>
 </head>
 <body>
-    <iframe id="youtube_video_player"
-        th:src="${'https://www.youtube.com/embed/' + videoId + '?autoplay=1&fullscreen=1'}"
-        title="YouTube video player"
-        allow="autoplay; fullscreen"
-        allowfullscreen>
-    </iframe>
+    <div id="video-player" th:data-video-id="${videoId}"></div>
+    <script th:src="@{/js/utils.js}"></script>
+    <script th:inline="javascript">setMessageStrings([[${messageStrings}]])</script>
     <script>
-        setTimeout(function() {
-        document.querySelector('iframe').requestFullscreen();
-        }, 5000);
+        var videoPlayer;
+
+        function onYouTubeIframeAPIReady() {
+          // alert('onYouTubeIframeAPIReady!');
+          videoPlayer = new YT.Player('video-player', {
+            height: '360',
+            width: '640',
+            videoId: $('#video-player').attr('data-video-id'),
+            playerVars: { 'autoplay': 1, 'controls': 1 },
+            events: {
+              'onReady': onPlayerReady,
+              'onStateChange': onPlayerStateChange
+            }
+          });
+
+          window.videoPlayer = videoPlayer;
+        }
+
+        function onPlayerReady(event) {
+          // alert('OnPlayerReady!');
+          event.target.playVideo(); // Auto-play when ready
+        }
+
+        function onPlayerStateChange(event) {
+          // alert('onPlayerStateChange!');
+          if (event.data == YT.PlayerState.ENDED) {
+            console.log("Video has ended");
+          }
+        }
+
+        function pauseVideo() {
+          videoPlayer.pauseVideo();
+        }
     </script>
+    <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>

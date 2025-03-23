@@ -9,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import lombok.Getter;
+import org.springframework.web.client.HttpClientErrorException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -17,7 +18,12 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> handleRuntimeException(RuntimeException e) {
-        return new ResponseEntity<>(new GenericErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new GenericErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler({Http400BadRequestException.class, Http405MethodNotAllowedRequestException.class})
+    public ResponseEntity<?> handleBadRequestAndMethodNotAllowedException(HttpClientErrorException e) {
+        return new ResponseEntity<>(new GenericErrorResponse(e.getStatusCode().value(), e.getStatusText()), e.getStatusCode());
     }
 
     // Handle @Valid errors (For @RequestBody)
@@ -46,11 +52,11 @@ public class ControllerExceptionHandler {
     }
 
     @Getter
-    private static class GenericErrorResponse<T> {
+    private static class GenericErrorResponse {
         private final int status;
-        private final T message;
+        private final String message;
 
-        public GenericErrorResponse(int status, T message) {
+        public GenericErrorResponse(int status, String message) {
             this.status = status;
             this.message = message;
         }

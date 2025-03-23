@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class SetWindowBoundsResponse {
-    public Long id;
-    public Result result;
+    private Long id;
+    private Result result;
 
     @Data
     public static class Result {
