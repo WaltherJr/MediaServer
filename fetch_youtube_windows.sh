@@ -1,0 +1,1 @@
+curl -k $1 | grep -E -o -m 1 '"videoId":"[A-Za-z0-9]+"' | head -n 1

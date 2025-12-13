@@ -1,0 +1,49 @@
+# Konfiguration som funkar för Aeotec Zi-Stick!
+version: 4
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://localhost
+homeassistant:
+  enabled: false
+serial:
+  port: COM3
+  adapter: ember
+  rtscts: true
+frontend:
+  enabled: true
+  port: 8081
+availability:
+  enabled: true
+advanced:
+  log_level: info
+  timestamp_format: 'YYYY-MM-DD HH:mm:ss'
+  log_directories_to_keep: 10
+  log_file: log.txt
+  log_directory: data/log/%TIMESTAMP%
+  network_key:
+    - 208
+    - 222
+    - 127
+    - 87
+    - 174
+    - 116
+    - 188
+    - 243
+    - 156
+    - 106
+    - 8
+    - 207
+    - 65
+    - 86
+    - 169
+    - 225
+  pan_id: 32769
+  ext_pan_id:
+    - 126
+    - 15
+    - 203
+    - 127
+    - 58
+    - 9
+    - 72
+    - 141
